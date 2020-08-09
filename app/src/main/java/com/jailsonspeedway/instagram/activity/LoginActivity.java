@@ -27,7 +27,6 @@ public class LoginActivity extends AppCompatActivity {
     private Usuario usuario;
     private FirebaseAuth autenticacao;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,7 +69,6 @@ public class LoginActivity extends AppCompatActivity {
         }
 
     }
-
     public void validarLogin(Usuario usuario){
 
         progressBar.setVisibility(View.VISIBLE);
