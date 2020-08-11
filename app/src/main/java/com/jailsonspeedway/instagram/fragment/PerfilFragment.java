@@ -1,5 +1,6 @@
 package com.jailsonspeedway.instagram.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -7,8 +8,15 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.GridView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.jailsonspeedway.instagram.R;
+import com.jailsonspeedway.instagram.activity.EditarPerfilActivity;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -16,6 +24,12 @@ import com.jailsonspeedway.instagram.R;
  * create an instance of this fragment.
  */
 public class PerfilFragment extends Fragment {
+
+    private ProgressBar progressBar;
+    private CircleImageView imagePerfil;
+    public GridView gridViewPerfil;
+    private TextView textPublicacoes, textSeguidores, textSeguindo;
+    private Button buttonEditarPerfil;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -55,12 +69,32 @@ public class PerfilFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_perfil, container, false);
+        View view = inflater.inflate(R.layout.fragment_perfil, container, false);
+        //Configurações dos componentes
+        gridViewPerfil = view.findViewById(R.id.gridViewPerfil);
+        progressBar = view.findViewById(R.id.progressBarPerfil);
+        imagePerfil = view.findViewById(R.id.imagePerfil);
+        textPublicacoes = view.findViewById(R.id.textPublicacoes);
+        textSeguidores = view.findViewById(R.id.textSeguidores);
+        textSeguindo = view.findViewById(R.id.textSeguindo);
+        buttonEditarPerfil = view.findViewById(R.id.buttonEditarPerfil);
+
+        //Abre edição de perfil
+        buttonEditarPerfil.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getActivity(), EditarPerfilActivity.class);
+                startActivity(i);
+            }
+        });
+
+        return view;
     }
 }
