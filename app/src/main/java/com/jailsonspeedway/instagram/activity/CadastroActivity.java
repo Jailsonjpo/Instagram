@@ -20,6 +20,7 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.jailsonspeedway.instagram.R;
 import com.jailsonspeedway.instagram.helper.ConfiguracaoFirebase;
+import com.jailsonspeedway.instagram.helper.UsuarioFirebase;
 import com.jailsonspeedway.instagram.model.Usuario;
 
 public class CadastroActivity extends AppCompatActivity {
@@ -79,7 +80,7 @@ public class CadastroActivity extends AppCompatActivity {
 
     }
 
-    public void cadastrar(Usuario usuario){
+    public void cadastrar(final Usuario usuario){
 
         progressBar.setVisibility(View.VISIBLE);
         autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -92,11 +93,29 @@ public class CadastroActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
 
-                            progressBar.setVisibility(View.GONE);
-                            Toast.makeText(CadastroActivity.this, "Cadastro efetuado com sucesso!", Toast.LENGTH_SHORT).show();
+                            try {
 
-                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                            finish();
+                                progressBar.setVisibility(View.GONE);
+
+                                //Salvar dados no firebase
+                                String idUsuario = task.getResult().getUser().getUid();
+                                usuario.setId(idUsuario);
+                                usuario.salvar();
+
+                                //Salvar dados no profile do Firebase
+                                UsuarioFirebase.atualizarNomeUsuario(usuario.getNome());
+
+                                Toast.makeText(CadastroActivity.this, "Cadastro efetuado com sucesso!", Toast.LENGTH_SHORT).show();
+
+                                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                                finish();
+
+                            }catch (Exception e ){
+                                e.printStackTrace();
+
+                            }
+
+
 
                         }else{
 

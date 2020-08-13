@@ -2,8 +2,8 @@
 <resources>
     <color name="colorPrimary">@android:color/white</color>
     <color name="colorPrimaryDark">#3700B3</color>
-    <color name="colorAccent">#03DAC5</color>
-    <color name="cinza_medio">#DBDBDB</color>
+    <color name="colorAccent">#A03D89</color>
+    <color name="cinza_medio">#EBEBEB</color>
     <color name="roxo">#462759</color>
     <color name="azulEscuro">#3f51b5</color>
 </resources>
