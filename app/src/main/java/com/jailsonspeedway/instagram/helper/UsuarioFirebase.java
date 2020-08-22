@@ -1,5 +1,6 @@
 package com.jailsonspeedway.instagram.helper;
 
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -16,6 +17,10 @@ public class UsuarioFirebase {
     public static FirebaseUser getUsuarioAtual(){
         FirebaseAuth usuario = ConfiguracaoFirebase.getFirebaseAutenticacao();
         return usuario.getCurrentUser();
+    }
+
+    public static String getIdentificadorUsuario(){
+        return getUsuarioAtual().getUid();
     }
 
     public static void atualizarNomeUsuario(String nome){
@@ -41,6 +46,31 @@ public class UsuarioFirebase {
             e.printStackTrace();
         }
     }
+
+    public static void atualizarFotoUsuario(Uri url){
+
+        try {
+            //Usuario logado no App
+            FirebaseUser usuarioLogado = getUsuarioAtual();
+
+            //Configurar objeto para alteracao do perfil
+            UserProfileChangeRequest profile = new UserProfileChangeRequest.Builder().setPhotoUri(url).build();
+
+            usuarioLogado.updateProfile(profile).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+
+                    if(!task.isSuccessful()){
+                        Log.d("Perfil", "Erro ao atualizar a Foto de perfil");
+                    }
+                }
+            });
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
 
     public static Usuario getDadosUsuarioLogado(){
 
