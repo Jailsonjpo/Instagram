@@ -26,6 +26,7 @@ import com.jailsonspeedway.instagram.activity.PerfilAmigoActivity;
 import com.jailsonspeedway.instagram.adapter.AdapterPesquisa;
 import com.jailsonspeedway.instagram.helper.ConfiguracaoFirebase;
 import com.jailsonspeedway.instagram.helper.RecyclerItemClickListener;
+import com.jailsonspeedway.instagram.helper.UsuarioFirebase;
 import com.jailsonspeedway.instagram.model.Usuario;
 
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ public class PesquisaFragment extends Fragment {
     private DatabaseReference usuariosRef;
 
     private AdapterPesquisa adapterPesquisa;
+    private String idUsuarioLogado;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -97,8 +99,9 @@ public class PesquisaFragment extends Fragment {
         recyclerPesquisa = view.findViewById(R.id.recyclerPesquisa);
 
         //Configuraçoes iniciais
-        listaUsuarios = new ArrayList<>();
-        usuariosRef = ConfiguracaoFirebase.getFirebase().child("usuarios");
+        listaUsuarios   = new ArrayList<>();
+        usuariosRef     = ConfiguracaoFirebase.getFirebase().child("usuarios");
+        idUsuarioLogado = UsuarioFirebase.getIdentificadorUsuario();
 
         //Configura RecyclerView
         recyclerPesquisa.setHasFixedSize(true);
@@ -172,6 +175,12 @@ public class PesquisaFragment extends Fragment {
                     listaUsuarios.clear();
 
                     for(DataSnapshot ds : dataSnapshot.getChildren()){
+
+                        //Verifica se é usuário logado e remove da lista
+                        Usuario usuario = ds.getValue(Usuario.class);
+                        if(idUsuarioLogado.equals(usuario.getId()))
+                            continue;
+
                         listaUsuarios.add(ds.getValue(Usuario.class));
                     }
 

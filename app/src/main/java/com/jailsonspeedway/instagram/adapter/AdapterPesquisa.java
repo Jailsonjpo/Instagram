@@ -32,7 +32,6 @@ public class AdapterPesquisa extends RecyclerView.Adapter<AdapterPesquisa.MyView
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-
         View itemLista = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_pesquisa_usuario, parent, false);
         return new MyViewHolder(itemLista);
     }
