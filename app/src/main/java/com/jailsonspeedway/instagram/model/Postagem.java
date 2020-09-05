@@ -3,7 +3,9 @@ package com.jailsonspeedway.instagram.model;
 import com.google.firebase.database.DatabaseReference;
 import com.jailsonspeedway.instagram.helper.ConfiguracaoFirebase;
 
-public class Postagem {
+import java.io.Serializable;
+
+public class Postagem implements Serializable {
 
     /*
     Modelo de Postagem

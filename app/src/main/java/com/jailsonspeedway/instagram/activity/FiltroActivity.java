@@ -1,6 +1,7 @@
 package com.jailsonspeedway.instagram.activity;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -24,6 +26,10 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.jailsonspeedway.instagram.R;
@@ -32,6 +38,7 @@ import com.jailsonspeedway.instagram.helper.ConfiguracaoFirebase;
 import com.jailsonspeedway.instagram.helper.RecyclerItemClickListener;
 import com.jailsonspeedway.instagram.helper.UsuarioFirebase;
 import com.jailsonspeedway.instagram.model.Postagem;
+import com.jailsonspeedway.instagram.model.Usuario;
 import com.zomato.photofilters.FilterPack;
 import com.zomato.photofilters.imageprocessors.Filter;
 import com.zomato.photofilters.utils.ThumbnailItem;
@@ -55,9 +62,15 @@ public class FiltroActivity extends AppCompatActivity {
     private TextInputEditText textDescricaoFiltro;
     private List<ThumbnailItem> listaFiltros;
     private String idUsuarioLogado;
+    private Usuario usuarioLogado;
+    private AlertDialog dialog;
 
     private RecyclerView recyclerFiltros;
     private AdapterMiniaturas adapterMiniaturas;
+
+    private DatabaseReference usuariosRef;
+    private DatabaseReference usuarioLogadoRef;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,11 +80,15 @@ public class FiltroActivity extends AppCompatActivity {
         //Configurações iniciais
         listaFiltros = new ArrayList<>();
         idUsuarioLogado = UsuarioFirebase.getIdentificadorUsuario();
+        usuariosRef = ConfiguracaoFirebase.getFirebase().child("usuarios");
 
         //Inicializar Componentes
         imagemFotoEscolhida = findViewById(R.id.imageFotoEscolhida);
         recyclerFiltros     = findViewById(R.id.recyclerFiltros);
         textDescricaoFiltro = findViewById(R.id.textDescricaoFiltro);
+
+        //Recuperar dados do usuário logado
+        recuperaDadosUsuarioLogado();
 
         //Configurar toolbar
         Toolbar toolbar = findViewById(R.id.toolbarPrincipal);
@@ -125,6 +142,37 @@ public class FiltroActivity extends AppCompatActivity {
         }
     }
 
+    private void abrirDialogCarregamento(String titulo){
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle(titulo);
+        alert.setCancelable(false);
+        alert.setView(R.layout.carregamento);
+
+        dialog = alert.create();
+        dialog.show();
+    }
+
+    private  void recuperaDadosUsuarioLogado(){
+        abrirDialogCarregamento("Carregando dados, aguarde!");
+        usuarioLogadoRef = usuariosRef.child(idUsuarioLogado);
+        usuarioLogadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                //Recupera dados de usuário logado
+                usuarioLogado = dataSnapshot.getValue(Usuario.class);
+                dialog.cancel();
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+
     private void recuperarFiltros(){
         //Limpar itens
         ThumbnailsManager.clearThumbs();
@@ -140,8 +188,8 @@ public class FiltroActivity extends AppCompatActivity {
         List<Filter> filtros = FilterPack.getFilterPack(getApplicationContext());
         for(Filter filtro: filtros){
             ThumbnailItem itemFiltro = new ThumbnailItem();
-            itemFiltro.image = imagem;
-            itemFiltro.filter = filtro;
+            itemFiltro.image      = imagem;
+            itemFiltro.filter     = filtro;
             itemFiltro.filterName = filtro.getName();
 
             ThumbnailsManager.addThumb(itemFiltro);
@@ -151,7 +199,7 @@ public class FiltroActivity extends AppCompatActivity {
     }
 
     private void publicarPostagem(){
-
+        abrirDialogCarregamento("Salvando postagem!");
         final Postagem postagem = new Postagem();
         postagem.setIdUsuario(idUsuarioLogado);
         postagem.setDescricao(textDescricaoFiltro.getText().toString());
@@ -162,7 +210,7 @@ public class FiltroActivity extends AppCompatActivity {
         byte[] dadosImagem = baos.toByteArray();
 
         //Salvar imagem no firebase storage
-        StorageReference storageRef = ConfiguracaoFirebase.getFirebaseStorage();
+        StorageReference storageRef      = ConfiguracaoFirebase.getFirebaseStorage();
         final StorageReference imagemRef = storageRef.child("imagens").child("postagens").child(postagem.getId()+".jpeg");
 
         UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
@@ -186,15 +234,21 @@ public class FiltroActivity extends AppCompatActivity {
 
                         //Salvar postagem
                         if(postagem.salvar()){
+
+                            //Atualizar qtde de postagens
+                            int qtdPostagem = usuarioLogado.getPostagens() + 1;
+                            usuarioLogado.setPostagens(qtdPostagem);
+                            usuarioLogado.atualizarQtdPostagem();
+
                             Toast.makeText(FiltroActivity.this, "Sucesso ao salvar postagem!", Toast.LENGTH_SHORT).show();
+                            dialog.cancel();
                             finish();
                         }
                     }
                 });
-
-
             }
         });
+
     }
 
     @Override
