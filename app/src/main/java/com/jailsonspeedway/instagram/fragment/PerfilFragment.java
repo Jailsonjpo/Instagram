@@ -121,16 +121,6 @@ public class PerfilFragment extends Fragment {
         //Configurações dos componentes
         inicializarComponentes(view);
 
-        //Recuparar foto do usuário
-        String caminhofoto = usuarioLogado.getCaminhoFoto();
-
-        if(caminhofoto != null){
-
-            //Converter caminhoFoto que é uma String para um Objeto do tipo Uri
-            Uri url = Uri.parse(caminhofoto);
-            Glide.with(getActivity()).load(url).into(imagePerfil);
-        }
-
         //Abre edição de perfil
         buttonAcaoPerfil.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -168,8 +158,6 @@ public class PerfilFragment extends Fragment {
 
                     //Log.i("postagem", "url: " + postagem.getCaminhoFoto());
                 }
-                int qtdPostagem = urlFotos.size();
-                textPublicacoes.setText(String.valueOf(qtdPostagem));
 
                 //Configurar adapter
                 adapterGrid = new AdapterGrid(getActivity(), R.layout.grid_postagem, urlFotos );
@@ -232,16 +220,31 @@ public class PerfilFragment extends Fragment {
 
     }
 
+    private void recuperarFotoUsuario(){
+
+        usuarioLogado = UsuarioFirebase.getDadosUsuarioLogado();
+
+        //Recuparar foto do usuário
+        String caminhofoto = usuarioLogado.getCaminhoFoto();
+
+        if(caminhofoto != null){
+
+            //Converter caminhoFoto que é uma String para um Objeto do tipo Uri
+            Uri url = Uri.parse(caminhofoto);
+            Glide.with(getActivity()).load(url).into(imagePerfil);
+        }
+
+    }
 
     @Override
     public void onStart() {
-
-
-
-
         super.onStart();
+
         //Recupera dados do usuário logado
         recuperaDadosUsuarioLogado();
+
+        //Recuperar foto usuario
+        recuperarFotoUsuario();
     }
 
     @Override
